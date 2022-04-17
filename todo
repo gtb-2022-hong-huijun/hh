@@ -1,33 +1,65 @@
 #!/usr/bin/env bash
 
 declare -r TODO_ROOT="$HOME/.todo"
-declare  -r TASKS_FILE="${TODO_ROOT}/tasks"
+declare -r TASKS_FILE="${TODO_ROOT}/tasks"
+
 
 if [[ $# -eq 0 ]]; then
   echo "usage: todo<init|list|add|edit|remove|reset|mark|unmark> [args]"
 fi
 
+
 if [[ $1 == 'init' ]]; then
    mkdir -p "$TODO_ROOT"
    touch "$TASKS_FILE"
-  echo "Initialized successfully."
+   echo "Initialized successfully."
 fi
+
 
 if [[ ! -f "$TASKS_FILE" ]];then
    echo "please run 'todo init' before running '$1' command."
 fi
 
-if [[ $1=='list' ]]; then
+
+if [[ $1 == 'list' ]]; then
    echo "# To be done"
-   cat "$TASKS_FILE"
+  grep '^[0-9]' "$TASKS_FILE"
    echo "# Completed"
    echo "# Empty"
 fi
 
-if [[ $1=='add' ]]; then
+
+
+if [[ $1 == 'add' ]]; then
    shift
-   declare -r Task_TITLE="$*"
+   declare -r TASK_TITLE="$*"
 
+   declare  LAST_TASK_ID
 
-  echo
+   LAST_TASK_ID=$(wc -l "$TASKS_FILE" | cut -d' ' -f1)
+   declare  -r LAST_TASK_ID
+
+   declare -r TASK_ID=$((LAST_TASK_ID + 1))
+   echo "$TASK_ID $TASK_TITLE">>"$TASKS_FILE"
+fi
+
+if [[ $1 == 'edit' ]]; then
+  declare -r TASK_ID="$2"
+  shift 2
+  declare -r TASK_TITLE="$*"
+
+  if ! grep --silent "^${TASK_ID} " "$TASKS_FILE";then
+     echo "Task not found!"
+     exit 1
+  else
+    sed -i'' "s/^${TASK_ID} .*/${TASK_ID} ${TASK_TITLE}/" "$TASKS_FILE"
+  fi
+
+fi
+
+if [[ $1 == 'remove' ]]; then
+  declare -r TASK_ID="$2"
+  for TASK_ID in "$@"; do
+  sed -i'' "s/^${TASK_ID} /-&/" "$TASKS_FILE"
+  done
 fi
