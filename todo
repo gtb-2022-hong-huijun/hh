@@ -51,28 +51,22 @@ if [[ $1 == 'edit' ]]; then
   shift 2
   declare -r TASK_TITLE="$*"
 
-  if ! grep --silent "^${TASK_ID} " "$TASKS_FILE";then
+  if ! grep --silent "^x\{0,1\}${TASK_ID} " "$TASKS_FILE";then
      echo "Task not found!"
      exit 1
   else
-    sed -i'' "s/^${TASK_ID} .*/${TASK_ID} ${TASK_TITLE}/" "$TASKS_FILE"
+    sed -i'' "s/^\(x\+${TASK_ID}\) .*/\1 ${TASK_TITLE}/" "$TASKS_FILE"
   fi
 
 fi
 
 if [[ $1 == 'remove' ]]; then
-
+  shift
   for TASK_ID in "$@"; do
   sed -i'' "s/^${TASK_ID} /-&/" "$TASKS_FILE"
   done
 fi
 
-if [[ $1 == 'reset' ]]; then
-  declare -r TASK_ID="$2"
-  for TASK_ID in "$@"; do
-  sed -i'' "s/^${TASK_ID} /-&/" "$TASKS_FILE"
-  done
-fi
 
 if [[ $1 == 'mark' ]]; then
   for TASK_ID in "$@";do
@@ -84,4 +78,7 @@ if [[ $1 == 'unmark' ]]; then
   for TASK_ID in "$@";do
     sed -i'' "s/^x${TASK_ID} /${TASK_ID} /" "$TASKS_FILE"
   done
+fi
+if [[ $1 == 'reset' ]]; then
+  truncate -s 0 "$TASKS_FILE"
 fi
