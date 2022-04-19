@@ -10,6 +10,10 @@ if [[ $# -eq 0 ]]; then
   echo "usage: todo<init|list|add|edit|remove|reset|mark|unmark> [args]"
 fi
 
+if [[ ! $1 =~ init|list|add|edit|remove|reset|mark|unmark ]]; then
+   echo "Unknown command:$1!"
+   exit 1
+fi
 
 if [[ $1 == 'init' ]]; then
    mkdir -p "$TODO_ROOT"
