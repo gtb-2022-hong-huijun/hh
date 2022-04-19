@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -o pipefail
+
 declare -r TODO_ROOT="$HOME/.todo"
 declare -r TASKS_FILE="${TODO_ROOT}/tasks"
 
@@ -25,9 +27,8 @@ if [[ $1 == 'list' ]]; then
    echo "# To be done"
    grep '^[0-9]' "$TASKS_FILE" || echo "Empty"
    echo "# Completed"
-   grep '^x[0-9]' "$TASKS_FILE" | sed 's/^x//'
+   grep '^x[0-9]' "$TASKS_FILE" | sed 's/^x//' || echo "Empty"
 
-   echo "# Empty"
 fi
 
 
@@ -72,9 +73,15 @@ if [[ $1 == 'reset' ]]; then
   sed -i'' "s/^${TASK_ID} /-&/" "$TASKS_FILE"
   done
 fi
+
 if [[ $1 == 'mark' ]]; then
   for TASK_ID in "$@";do
     sed -i'' "s/^${TASK_ID} /x&/" "$TASKS_FILE"
   done
 fi
 
+if [[ $1 == 'unmark' ]]; then
+  for TASK_ID in "$@";do
+    sed -i'' "s/^x${TASK_ID} /${TASK_ID} /" "$TASKS_FILE"
+  done
+fi
